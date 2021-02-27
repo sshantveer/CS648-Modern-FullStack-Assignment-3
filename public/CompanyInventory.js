@@ -2,6 +2,10 @@
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -22,17 +26,43 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var ProductList = /*#__PURE__*/function (_React$Component) {
-  _inherits(ProductList, _React$Component);
+var ProductTable = /*#__PURE__*/function (_React$Component) {
+  _inherits(ProductTable, _React$Component);
 
-  var _super = _createSuper(ProductList);
+  var _super = _createSuper(ProductTable);
+
+  function ProductTable() {
+    _classCallCheck(this, ProductTable);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(ProductTable, [{
+    key: "render",
+    value: function render() {
+      var productRows = this.props.products.map(function (product) {
+        return /*#__PURE__*/React.createElement(ProductRow, {
+          product: product
+        });
+      });
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", null, "Showing all available products"), /*#__PURE__*/React.createElement("hr", null), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Id"), /*#__PURE__*/React.createElement("th", null, "Product Name"), /*#__PURE__*/React.createElement("th", null, "Price"), /*#__PURE__*/React.createElement("th", null, "Category"), /*#__PURE__*/React.createElement("th", null, "Image"))), /*#__PURE__*/React.createElement("tbody", null, productRows)));
+    }
+  }]);
+
+  return ProductTable;
+}(React.Component);
+
+var ProductList = /*#__PURE__*/function (_React$Component2) {
+  _inherits(ProductList, _React$Component2);
+
+  var _super2 = _createSuper(ProductList);
 
   function ProductList(props) {
     var _this;
 
     _classCallCheck(this, ProductList);
 
-    _this = _super.call(this, props);
+    _this = _super2.call(this, props);
     _this.state = {
       products: []
     };
@@ -47,24 +77,92 @@ var ProductList = /*#__PURE__*/function (_React$Component) {
     }
   }, {
     key: "loadData",
-    value: function loadData() {
-      var _this2 = this;
+    value: function () {
+      var _loadData = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+        var query, response, result;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                query = "query {\n          allProducts {\n              id\n              productName\n              price\n              category\n              imageUrl\n          }\n      }";
+                _context.next = 3;
+                return fetch("/graphql", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    query: query
+                  })
+                });
 
-      setTimeout(function () {
-        _this2.setState({
-          products: []
-        });
-      }, 500);
-    }
+              case 3:
+                response = _context.sent;
+                _context.next = 6;
+                return response.json();
+
+              case 6:
+                result = _context.sent;
+                this.setState({
+                  products: result.data.allProducts
+                });
+
+              case 8:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function loadData() {
+        return _loadData.apply(this, arguments);
+      }
+
+      return loadData;
+    }()
   }, {
     key: "createProduct",
-    value: function createProduct(product) {
-      var newProductList = this.state.products.slice();
-      newProductList.push(product);
-      this.setState({
-        products: newProductList
-      });
-    }
+    value: function () {
+      var _createProduct = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(product) {
+        var query, response;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                query = "mutation addProduct($product: ProductInputs!) {\n          addProduct(product: $product) {\n              id\n          }\n      }";
+                _context2.next = 3;
+                return fetch("/graphql", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    query: query,
+                    variables: {
+                      product: product
+                    }
+                  })
+                });
+
+              case 3:
+                response = _context2.sent;
+                this.loadData();
+
+              case 5:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function createProduct(_x) {
+        return _createProduct.apply(this, arguments);
+      }
+
+      return createProduct;
+    }()
   }, {
     key: "render",
     value: function render() {
@@ -77,32 +175,6 @@ var ProductList = /*#__PURE__*/function (_React$Component) {
   }]);
 
   return ProductList;
-}(React.Component);
-
-var ProductTable = /*#__PURE__*/function (_React$Component2) {
-  _inherits(ProductTable, _React$Component2);
-
-  var _super2 = _createSuper(ProductTable);
-
-  function ProductTable() {
-    _classCallCheck(this, ProductTable);
-
-    return _super2.apply(this, arguments);
-  }
-
-  _createClass(ProductTable, [{
-    key: "render",
-    value: function render() {
-      var productRows = this.props.products.map(function (product) {
-        return /*#__PURE__*/React.createElement(ProductRow, {
-          product: product
-        });
-      });
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", null, "Showing all available products"), /*#__PURE__*/React.createElement("hr", null), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Product Name"), /*#__PURE__*/React.createElement("th", null, "Price"), /*#__PURE__*/React.createElement("th", null, "Category"), /*#__PURE__*/React.createElement("th", null, "Image"))), /*#__PURE__*/React.createElement("tbody", null, productRows)));
-    }
-  }]);
-
-  return ProductTable;
 }(React.Component);
 
 var ProductRow = /*#__PURE__*/function (_React$Component3) {
@@ -120,7 +192,7 @@ var ProductRow = /*#__PURE__*/function (_React$Component3) {
     key: "render",
     value: function render() {
       var product = this.props.product;
-      return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, product.productName), /*#__PURE__*/React.createElement("td", null, "$", product.price), /*#__PURE__*/React.createElement("td", null, product.category), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
+      return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, product.id), /*#__PURE__*/React.createElement("td", null, product.productName), /*#__PURE__*/React.createElement("td", null, "$", product.price), /*#__PURE__*/React.createElement("td", null, product.category), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
         href: product.imageUrl,
         target: "_blank"
       }, "View")));
@@ -136,13 +208,13 @@ var ProductAdd = /*#__PURE__*/function (_React$Component4) {
   var _super4 = _createSuper(ProductAdd);
 
   function ProductAdd() {
-    var _this3;
+    var _this2;
 
     _classCallCheck(this, ProductAdd);
 
-    _this3 = _super4.call(this);
-    _this3.handleSubmit = _this3.handleSubmit.bind(_assertThisInitialized(_this3));
-    return _this3;
+    _this2 = _super4.call(this);
+    _this2.handleSubmit = _this2.handleSubmit.bind(_assertThisInitialized(_this2));
+    return _this2;
   }
 
   _createClass(ProductAdd, [{
@@ -168,7 +240,9 @@ var ProductAdd = /*#__PURE__*/function (_React$Component4) {
       return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", null, "Add a new product to inventory"), /*#__PURE__*/React.createElement("hr", null), /*#__PURE__*/React.createElement("form", {
         name: "productAdd",
         onSubmit: this.handleSubmit
-      }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("label", null, "Category"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("select", {
+      }, /*#__PURE__*/React.createElement("table", {
+        border: "0"
+      }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("label", null, "Category"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("select", {
         id: "category",
         name: "category"
       }, /*#__PURE__*/React.createElement("option", {
@@ -195,7 +269,7 @@ var ProductAdd = /*#__PURE__*/function (_React$Component4) {
         colSpan: "2"
       }, /*#__PURE__*/React.createElement("button", {
         name: "submit"
-      }, "Add Product")))))));
+      }, "Add Product"))))));
     }
   }]);
 
